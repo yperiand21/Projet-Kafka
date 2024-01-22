@@ -25,12 +25,16 @@ def main():
             data = response.json()
 
             # Parcourir les données reçues et les envoyer aux topics Kafka
-            for record in data.get('records', []):
-                fields = record.get('fields', {})
+            for item in data['results']:
+                nature = item.get('gc_obo_nature_c', 'Inconnu')
+                gare = item.get('gc_obo_gare_origine_r_name', 'Inconnue')
 
-                # Exemple d'envoi des données
-                send_data('type_objet_perdu', fields.get('type', 'Inconnu'), fields)
-                send_data('gare_objet_perdu', fields.get('gare', 'Inconnue'), fields)
+                # Envoi des données au topic 'type_objet_perdu'
+                send_data('type_objet_perdu', nature, item)
+
+                # Envoi des données au topic 'gare_objet_perdu', si le nom de la gare est disponible
+                if gare:
+                    send_data('gare_objet_perdu', gare, item)
 
                 time.sleep(1)  # Pause pour simuler l'envoi de données en temps réel
         else:
